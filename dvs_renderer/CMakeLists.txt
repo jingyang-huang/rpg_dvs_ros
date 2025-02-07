@@ -7,6 +7,10 @@ catkin_simple()
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
 
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+endif ()
+
 find_package(OpenCV REQUIRED)
 
 # make the executable

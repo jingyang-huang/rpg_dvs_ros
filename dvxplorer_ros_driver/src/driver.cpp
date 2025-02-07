@@ -265,12 +265,14 @@ void DvxplorerRosDriver::callback(dvxplorer_ros_driver::DVXplorer_ROS_DriverConf
 	// Streaming rate changes.
 	if (level & (0x01 << 5)) {
 		if (config.streaming_rate > 0) {
-			delta_ = boost::posix_time::microseconds(long(1e6 / config.streaming_rate));
+			delta_ = boost::posix_time::microseconds(long(1e6 / config.streaming_rate));  //改变帧率
 		}
 
 		streaming_rate_ = config.streaming_rate;
 		max_events_     = config.max_events;
+		std::cout<<"streaming_rate_: "<<streaming_rate_<< " max_events_: "<<max_events_<<std::endl;
 	}
+	
 }
 
 void DvxplorerRosDriver::readout() {
@@ -285,8 +287,12 @@ void DvxplorerRosDriver::readout() {
 
 	while (running_) {
 		try {
+			// 记录开始时间
+			// boost::posix_time::ptime driver_start_time = boost::posix_time::microsec_clock::local_time();
+
 			caerEventPacketContainer packetContainer = caerDeviceDataGet(dvxplorer_handle_);
 			if (packetContainer == nullptr) {
+				ROS_WARN("No data received, retrying...");
 				continue; // Skip if nothing there.
 			}
 
@@ -335,6 +341,7 @@ void DvxplorerRosDriver::readout() {
 					// throttle event messages
 					if ((boost::posix_time::microsec_clock::local_time() > next_send_time) || (streaming_rate == 0)
 						|| ((max_events != 0) && (event_array_msg->events.size() > max_events))) {
+						// streaming_rate 和 max_events都为0的话，没有限制，来了就发
 						event_array_pub_.publish(event_array_msg);
 
 						if (streaming_rate > 0) {
@@ -410,6 +417,11 @@ void DvxplorerRosDriver::readout() {
 			caerEventPacketContainerFree(packetContainer);
 
 			ros::spinOnce();
+			// 记录结束时间
+			// boost::posix_time::ptime driver_end_time = boost::posix_time::microsec_clock::local_time();
+			// boost::posix_time::time_duration duration = driver_end_time - driver_start_time;
+			// std::cout << "Time taken for this packet: " << duration.total_milliseconds() << " milliseconds" << std::endl; // 7- 10 ms 
+                
 		}
 		catch (boost::thread_interrupted &) {
 			return;

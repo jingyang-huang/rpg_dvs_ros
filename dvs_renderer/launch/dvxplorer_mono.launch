@@ -1,6 +1,6 @@
 <launch>
   <!-- camera driver -->
-  <node name="dvxplorer_ros_driver" pkg="dvxplorer_ros_driver" type="dvxplorer_ros_driver" />
+  <node name="dvxplorer_ros_driver" pkg="dvxplorer_ros_driver" type="dvxplorer_ros_driver" output="screen"/>
 
   <!-- visualization -->
   <node name="dvs_renderer" pkg="dvs_renderer" type="dvs_renderer">
